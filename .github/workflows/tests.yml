@@ -16,3 +16,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
       - run: python -m msm.benchmark --quick --no-plots --out /tmp/bench
+      - name: Execute the results notebook
+        run: |
+          pip install nbconvert ipykernel
+          jupyter nbconvert --to notebook --execute notebooks/msm_results.ipynb --output /tmp/msm_results_executed.ipynb

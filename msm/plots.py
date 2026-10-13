@@ -4,9 +4,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
 # Fixed colour per algorithm (never re-assigned by rank). Variants of the
 # same family are dashed so identity never relies on colour alone.
@@ -32,8 +30,8 @@ def _series(rows, x_key, y_key, fixed_key, fixed_value, per_point=False):
     return {k: sorted(v) for k, v in data.items()}
 
 
-def _line_chart(series, title, xlabel, ylabel, path, logx=True, logy=True):
-    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=150)
+def _line_chart(series, title, xlabel, ylabel, logx=True, logy=True):
+    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=110)
     fig.patch.set_facecolor("white")
     for name, (color, ls, marker) in STYLE.items():
         if name not in series:
@@ -60,31 +58,41 @@ def _line_chart(series, title, xlabel, ylabel, path, logx=True, logy=True):
         ax.spines[side].set_color(GRID)
     ax.legend(frameon=False, fontsize=9, labelcolor=INK, loc="upper left")
     fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
+    return fig
+
+
+# name -> (series arguments, title, x label, y label, log y?)
+FIGURES = {
+    "ops_vs_points": (("points", "total_operations", "scalar_bits", 32, False),
+                      "Point operations vs number of points (32-bit scalars)",
+                      "Number of points (n)", "Point additions + doublings", True),
+    "time_vs_points": (("points", "time_s", "scalar_bits", 32, False),
+                       "Execution time vs number of points (32-bit scalars)",
+                       "Number of points (n)", "Median time (s)", True),
+    "ops_vs_bits": (("scalar_bits", "total_operations", "points", 20, False),
+                    "Point operations vs scalar bit length (n = 20)",
+                    "Scalar bit length", "Point additions + doublings", True),
+    "ops_per_point": (("points", "total_operations", "scalar_bits", 32, True),
+                      "Operations per point (32-bit scalars)",
+                      "Number of points (n)", "Operations per point", False),
+    "memory_vs_points": (("points", "peak_memory_kib", "scalar_bits", 32, False),
+                         "Peak memory vs number of points (32-bit scalars)",
+                         "Number of points (n)", "Peak Python allocation (KiB)", True),
+}
+
+
+def figure(rows, name):
+    """Build one of the named figures in ``FIGURES`` and return it."""
+    (x_key, y_key, fixed_key, fixed_value, per_point), title, xlabel, ylabel, logy = FIGURES[name]
+    series = _series(rows, x_key, y_key, fixed_key, fixed_value, per_point=per_point)
+    return _line_chart(series, title, xlabel, ylabel, logy=logy)
 
 
 def make_all_figures(rows, out_dir):
+    """Save every figure in ``FIGURES`` as ``<out_dir>/<name>.png``."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-
-    _line_chart(_series(rows, "points", "total_operations", "scalar_bits", 32),
-                "Point operations vs number of points (32-bit scalars)",
-                "Number of points (n)", "Point additions + doublings",
-                out / "ops_vs_points.png")
-    _line_chart(_series(rows, "points", "time_s", "scalar_bits", 32),
-                "Execution time vs number of points (32-bit scalars)",
-                "Number of points (n)", "Median time (s)",
-                out / "time_vs_points.png")
-    _line_chart(_series(rows, "scalar_bits", "total_operations", "points", 20),
-                "Point operations vs scalar bit length (n = 20)",
-                "Scalar bit length", "Point additions + doublings",
-                out / "ops_vs_bits.png")
-    _line_chart(_series(rows, "points", "total_operations", "scalar_bits", 32, per_point=True),
-                "Operations per point (32-bit scalars)",
-                "Number of points (n)", "Operations per point",
-                out / "ops_per_point.png", logy=False)
-    _line_chart(_series(rows, "points", "peak_memory_kib", "scalar_bits", 32),
-                "Peak memory vs number of points (32-bit scalars)",
-                "Number of points (n)", "Peak Python allocation (KiB)",
-                out / "memory_vs_points.png")
+    for name in FIGURES:
+        fig = figure(rows, name)
+        fig.savefig(out / f"{name}.png", dpi=150)
+        plt.close(fig)

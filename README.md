@@ -41,7 +41,7 @@ Point operations (additions + doublings) for selected cases. Lower is better; th
 | 20 × 128 | **685** | 1,167 | 2,168 | 1,167 | 3,079 |
 | 100 × 256 | **4,640** | 7,146 | 19,370 | 8,440 | 66,427 |
 
-Full results for all 12 cases are in [`results/benchmark_results.csv`](results/benchmark_results.csv), with more figures in [`results/figures/`](results/figures).
+Full results for all 12 cases are in [`results/benchmark_results.csv`](results/benchmark_results.csv). For every chart with an explanation of what it shows, see the **[results notebook](notebooks/msm_results.ipynb)** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Yousefscode/Optimising-Multi-Scalar-Multiplication/blob/main/notebooks/msm_results.ipynb).
 
 **Findings**
 
@@ -68,8 +68,10 @@ Full results for all 12 cases are in [`results/benchmark_results.csv`](results/b
 │   └── plots.py                 # figures
 ├── tests/test_correctness.py    # every algorithm vs the naive result
 ├── results/                     # benchmark CSV + figures
-├── notebooks/dissertation_notebook.ipynb   # original notebook, as submitted
-└── docs/dissertation.pdf        # full dissertation
+├── notebooks/
+│   ├── msm_results.ipynb        # results walkthrough: charts + takeaways
+│   └── dissertation_notebook.ipynb   # original notebook, as submitted
+└── docs/BSc_Dissertation_Abdelghani.pdf  # full dissertation
 ```
 
 ## Running it
@@ -108,7 +110,7 @@ print(ops)   # {'additions': ..., 'doublings': ...}
 
 ## Dissertation
 
-The full write-up, including the literature review, the theory behind each algorithm and the analysis, is in [`docs/dissertation.pdf`](docs/dissertation.pdf).
+The full write-up, including the literature review, the theory behind each algorithm and the analysis, is in [`docs/BSc_Dissertation_Abdelghani.pdf`](docs/BSc_Dissertation_Abdelghani.pdf).
 
 ## Author
 

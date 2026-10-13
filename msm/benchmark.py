@@ -80,6 +80,20 @@ def run(cases, trials=3, curve_name="secp256k1", seed=42):
     return rows
 
 
+def load_csv(path):
+    """Load rows written by :func:`save_csv`, with numeric columns converted."""
+    ints = {"points", "scalar_bits", "additions", "doublings", "total_operations"}
+    floats = {"time_s", "peak_memory_kib"}
+    with Path(path).open(newline="") as f:
+        rows = list(csv.DictReader(f))
+    for r in rows:
+        for k in ints:
+            r[k] = int(r[k])
+        for k in floats:
+            r[k] = float(r[k])
+    return rows
+
+
 def save_csv(rows, path):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -107,6 +121,8 @@ def main():
     print(f"Saved {out / 'benchmark_results.csv'}")
 
     if not args.no_plots:
+        import matplotlib
+        matplotlib.use("Agg")
         from .plots import make_all_figures
         make_all_figures(rows, out / "figures")
         print(f"Saved figures to {out / 'figures'}")
